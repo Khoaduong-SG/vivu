@@ -3,251 +3,507 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Vivu - Đặt xe & Giao đồ ăn địa phương</title>
+  <title>Vivu — Gọi xe & Giao đồ ăn địa phương</title>
   <style>
-    * { box-sizing: border-box; font-family: system-ui, -apple-system, sans-serif; }
-    body { margin: 0; background: #f4f6f8; color: #1f2937; }
-    header { background: #0f766e; color: #fff; padding: 14px 16px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 10; }
-    .brand { font-size: 20px; font-weight: 700; letter-spacing: 0.3px; }
-    .role-bar { display: flex; gap: 6px; flex-wrap: wrap; }
-    .role-btn { border: 1px solid rgba(255,255,255,0.35); background: transparent; color: #fff; padding: 6px 10px; border-radius: 8px; cursor: pointer; font-size: 12px; }
-    .role-btn.active { background: #fff; color: #0f766e; font-weight: 700; }
-    .container { max-width: 720px; margin: 16px auto; padding: 0 14px 40px; }
-    .card { background: #fff; border-radius: 12px; padding: 16px; margin-bottom: 14px; box-shadow: 0 1px 4px rgba(0,0,0,0.06); }
-    h2, h3 { margin: 0 0 10px; }
-    label { display: block; font-size: 13px; font-weight: 600; margin: 10px 0 4px; }
-    input, select, textarea { width: 100%; padding: 10px; border: 1px solid #d1d5db; border-radius: 8px; font-size: 14px; }
-    .btn { margin-top: 12px; background: #0f766e; color: #fff; border: none; padding: 10px 16px; border-radius: 8px; font-weight: 600; cursor: pointer; }
-    .btn-sm { padding: 6px 10px; font-size: 12px; margin-top: 6px; }
-    .item-row { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid #f1f5f9; gap: 10px; }
-    .badge { display: inline-block; padding: 3px 8px; border-radius: 999px; font-size: 12px; background: #e6fffa; color: #0f766e; font-weight: 600; }
+    :root {
+      --primary: #0d9488;
+      --primary-dark: #0f766e;
+      --primary-light: #f0fdfa;
+      --accent: #f97316;
+      --bg: #f8fafc;
+      --card: #ffffff;
+      --text: #0f172a;
+      --muted: #64748b;
+      --border: #e2e8f0;
+      --success-bg: #dcfce7;
+      --success-text: #166534;
+      --warn-bg: #fef3c7;
+      --warn-text: #92400e;
+    }
+    * { box-sizing: border-box; font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+    body { margin: 0; background: var(--bg); color: var(--text); line-height: 1.5; }
+    .topbar {
+      background: linear-gradient(135deg, var(--primary-dark), var(--primary));
+      color: #fff;
+      padding: 14px 18px;
+      position: sticky;
+      top: 0;
+      z-index: 30;
+      box-shadow: 0 2px 10px rgba(15, 23, 42, 0.12);
+    }
+    .topbar-inner {
+      max-width: 960px;
+      margin: 0 auto;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+    .brand-wrap { display: flex; align-items: center; gap: 10px; }
+    .brand-logo {
+      width: 38px; height: 38px; border-radius: 10px;
+      background: rgba(255,255,255,0.18);
+      display: grid; place-items: center; font-weight: 800; font-size: 18px;
+    }
+    .brand-title { font-size: 19px; font-weight: 800; letter-spacing: -0.2px; }
+    .brand-sub { font-size: 12px; opacity: 0.9; }
+    .role-switcher {
+      display: flex; gap: 6px; flex-wrap: wrap;
+      background: rgba(0, 0, 0, 0.14); padding: 4px; border-radius: 12px;
+    }
+    .role-btn {
+      border: none; background: transparent; color: rgba(255,255,255,0.9);
+      padding: 7px 12px; border-radius: 9px; font-size: 13px; font-weight: 600;
+      cursor: pointer; transition: 0.15s ease;
+    }
+    .role-btn:hover { background: rgba(255,255,255,0.14); }
+    .role-btn.active { background: #fff; color: var(--primary-dark); box-shadow: 0 1px 4px rgba(0,0,0,0.15); }
+
+    .container { max-width: 960px; margin: 20px auto; padding: 0 16px 56px; }
+    .grid-2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 16px; }
+    .card {
+      background: var(--card); border: 1px solid var(--border); border-radius: 16px;
+      padding: 18px; margin-bottom: 16px; box-shadow: 0 2px 8px rgba(15, 23, 42, 0.04);
+    }
+    .card-header { display: flex; justify-content: space-between; align-items: center; gap: 8px; margin-bottom: 12px; }
+    h2 { margin: 0; font-size: 18px; }
+    h3 { margin: 0 0 10px; font-size: 16px; }
+    .muted { color: var(--muted); font-size: 13px; }
+    label { display: block; font-size: 13px; font-weight: 600; margin: 10px 0 5px; color: #334155; }
+    input, select, textarea {
+      width: 100%; padding: 10px 12px; border: 1px solid #cbd5e1; border-radius: 10px;
+      font-size: 14px; background: #fff; color: var(--text);
+    }
+    input:focus, select:focus { outline: 2px solid rgba(13, 148, 136, 0.25); border-color: var(--primary); }
+    .btn {
+      background: var(--primary); color: #fff; border: none; padding: 10px 16px;
+      border-radius: 10px; font-weight: 700; font-size: 14px; cursor: pointer;
+      display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+    }
+    .btn:hover { background: var(--primary-dark); }
+    .btn-accent { background: var(--accent); }
+    .btn-accent:hover { background: #ea580c; }
+    .btn-outline {
+      background: #fff; color: var(--text); border: 1px solid #cbd5e1;
+    }
+    .btn-outline:hover { background: #f1f5f9; }
+    .btn-sm { padding: 6px 11px; font-size: 12px; border-radius: 8px; }
+
+    .fare-panel {
+      background: var(--primary-light); border: 1px solid #99f6e4; border-radius: 12px;
+      padding: 12px 14px; margin-top: 12px; display: flex; justify-content: space-between;
+      align-items: center; gap: 10px; flex-wrap: wrap;
+    }
+    .fare-amount { font-size: 18px; font-weight: 800; color: var(--primary-dark); }
+
+    .shop-card {
+      border: 1px solid var(--border); border-radius: 12px; padding: 12px;
+      display: flex; justify-content: space-between; align-items: center; gap: 12px;
+      margin-bottom: 10px; background: #fcfcfd;
+    }
+    .order-item {
+      border: 1px solid var(--border); border-radius: 12px; padding: 12px;
+      margin-bottom: 10px; display: flex; justify-content: space-between;
+      align-items: center; gap: 12px; flex-wrap: wrap;
+    }
+    .pill {
+      padding: 4px 10px; border-radius: 999px; font-size: 12px; font-weight: 700;
+      display: inline-block;
+    }
+    .pill-warn { background: var(--warn-bg); color: var(--warn-text); }
+    .pill-ok { background: var(--success-bg); color: var(--success-text); }
+    .pill-info { background: #e0f2fe; color: #075985; }
+    .stats-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 14px; }
+    .stat-box { background: #f8fafc; border: 1px solid var(--border); border-radius: 12px; padding: 12px; }
+    .stat-val { font-size: 18px; font-weight: 800; color: var(--primary-dark); }
     .hidden { display: none; }
-    .summary-box { background: #f0fdfa; border: 1px solid #99f6e4; padding: 12px; border-radius: 8px; margin-top: 10px; }
+    .toast {
+      position: fixed; bottom: 18px; right: 18px; background: #0f172a; color: #fff;
+      padding: 11px 16px; border-radius: 10px; font-size: 13px; font-weight: 600;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.2); z-index: 50; opacity: 0; transform: translateY(10px);
+      transition: 0.2s ease; pointer-events: none;
+    }
+    .toast.show { opacity: 1; transform: translateY(0); }
   </style>
 </head>
 <body>
-  <header>
-    <div class="brand">Vivu</div>
-    <div class="role-bar">
-      <button class="role-btn active" onclick="switchRole('customer', this)">Khách hàng</button>
-      <button class="role-btn" onclick="switchRole('merchant', this)">Chủ quán</button>
-      <button class="role-btn" onclick="switchRole('driver', this)">Tài xế</button>
-      <button class="role-btn" onclick="switchRole('admin', this)">Admin</button>
+  <header class="topbar">
+    <div class="topbar-inner">
+      <div class="brand-wrap">
+        <div class="brand-logo">V</div>
+        <div>
+          <div class="brand-title">Vivu Local</div>
+          <div class="brand-sub">Gọi xe & Giao đồ ăn cộng đồng</div>
+        </div>
+      </div>
+      <div class="role-switcher" role="tablist" aria-label="Chuyển vai trò">
+        <button class="role-btn active" onclick="setRole('customer', this)">Khách hàng</button>
+        <button class="role-btn" onclick="setRole('merchant', this)">Chủ quán</button>
+        <button class="role-btn" onclick="setRole('driver', this)">Tài xế</button>
+        <button class="role-btn" onclick="setRole('admin', this)">Admin</button>
+      </div>
     </div>
   </header>
 
-  <div class="container">
-    <!-- 1. KHÁCH HÀNG -->
-    <section id="role-customer">
-      <div class="card">
-        <h2>Đặt xe Vivu (Ước tính cước)</h2>
-        <label>Điểm đón</label>
-        <input id="pickup" placeholder="VD: Ngã 6, đường Nguyễn Tất Thành" />
-        <label>Điểm đến</label>
-        <input id="dropoff" placeholder="VD: Chợ trung tâm" />
-        <label>Khoảng cách ước tính (km)</label>
-        <input id="kmInput" type="number" step="0.5" min="1" value="3.5" oninput="calcFare()" />
-        <div class="summary-box" id="fareBox">Cước tạm tính (6.000đ/km): <strong>21.000đ</strong></div>
-        <button class="btn" onclick="createRideOrder()">Đặt xe ngay</button>
+  <main class="container">
+    <!-- KHÁCH HÀNG -->
+    <section id="view-customer">
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-header">
+            <h2>Đặt xe Vivu</h2>
+            <span class="pill pill-info">6.000đ / km</span>
+          </div>
+          <p class="muted">Nhập điểm đón, điểm đến và khoảng cách (hoặc nối Google Distance Matrix API để tự tính km).</p>
+          <label for="pickup">Điểm đón</label>
+          <input id="pickup" placeholder="VD: Ngã tư trung tâm, đường Lê Lợi" />
+          <label for="dropoff">Điểm đến</label>
+          <input id="dropoff" placeholder="VD: Chợ địa phương, bến xe" />
+          <label for="distanceKm">Khoảng cách (km)</label>
+          <input id="distanceKm" type="number" min="0.5" step="0.5" value="3.5" oninput="updateFarePreview()" />
+          <div class="fare-panel">
+            <div>
+              <div class="muted">Cước xe ước tính (tối thiểu 10.000đ)</div>
+              <div id="fareFormula" class="muted">3.5 km × 6.000đ</div>
+            </div>
+            <div id="farePreview" class="fare-amount">21.000đ</div>
+          </div>
+          <button class="btn" style="width:100%; margin-top:12px;" onclick="bookRide()">Đặt chuyến xe ngay</button>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <h2>Đặt đồ ăn quanh đây</h2>
+            <span class="pill pill-ok" id="approvedShopCount">0 quán</span>
+          </div>
+          <p class="muted">Các cửa hàng địa phương đã được Admin duyệt mở bán trên Vivu.</p>
+          <div id="customerShopList"></div>
+        </div>
       </div>
 
       <div class="card">
-        <h2>Đặt đồ ăn địa phương</h2>
-        <div id="approvedMenus"></div>
-      </div>
-
-      <div class="card">
-        <h3>Đơn của tôi</h3>
-        <div id="customerOrders"></div>
+        <div class="card-header">
+          <h2>Lịch sử & Trạng thái đơn của tôi</h2>
+          <button class="btn btn-outline btn-sm" onclick="resetDemoData()">Khôi phục dữ liệu mẫu</button>
+        </div>
+        <div id="customerOrderList"></div>
       </div>
     </section>
 
-    <!-- 2. CHỦ QUÁN -->
-    <section id="role-merchant" class="hidden">
-      <div class="card">
-        <h2>Đăng ký mở quán trên Vivu</h2>
-        <label>Tên quán</label>
-        <input id="shopName" placeholder="VD: Bún Chả Cô Lan" />
-        <label>Địa chỉ quán</label>
-        <input id="shopAddr" placeholder="VD: 45 Lê Duẩn" />
-        <label>Món nổi bật & Giá (VD: Bún chả đặc biệt - 35000)</label>
-        <input id="shopDish" placeholder="VD: Bún chả đặc biệt - 35000" />
-        <button class="btn" onclick="registerShop()">Gửi hồ sơ đăng ký quán</button>
-      </div>
+    <!-- CHỦ QUÁN -->
+    <section id="view-merchant" class="hidden">
+      <div class="grid-2">
+        <div class="card">
+          <h2>Đăng ký mở quán trên Vivu</h2>
+          <p class="muted">Điền thông tin quán và món chủ lực. Hồ sơ sẽ chuyển sang Admin duyệt.</p>
+          <label for="shopName">Tên cửa hàng</label>
+          <input id="shopName" placeholder="VD: Phở Bò Gia Truyền" />
+          <label for="shopAddress">Địa chỉ</label>
+          <input id="shopAddress" placeholder="VD: 88 Trần Hưng Đạo" />
+          <label for="dishName">Món nổi bật</label>
+          <input id="dishName" placeholder="VD: Phở tái nạm đặc biệt" />
+          <label for="dishPrice">Giá món (VNĐ)</label>
+          <input id="dishPrice" type="number" min="5000" step="1000" value="35000" />
+          <button class="btn btn-accent" style="width:100%; margin-top:12px;" onclick="submitShop()">Gửi đăng ký quán</button>
+        </div>
 
-      <div class="card">
-        <h3>Đơn đồ ăn cần xử lý</h3>
-        <div id="merchantOrders"></div>
+        <div class="card">
+          <h2>Đơn đồ ăn chờ quán xử lý</h2>
+          <p class="muted">Bấm <strong>Xác nhận làm món</strong> để chuyển đơn sang cho tài xế nhận giao.</p>
+          <div id="merchantOrderList"></div>
+        </div>
       </div>
     </section>
 
-    <!-- 3. TÀI XẾ -->
-    <section id="role-driver" class="hidden">
+    <!-- TÀI XẾ -->
+    <section id="view-driver" class="hidden">
       <div class="card">
-        <h2>Màn hình Tài xế Vivu</h2>
-        <p>Trạng thái: <span class="badge" id="driverStatus">Đang sẵn sàng</span></p>
-        <div id="driverOrders"></div>
+        <div class="card-header">
+          <h2>Bảng điều khiển Tài xế</h2>
+          <button class="btn btn-sm" id="driverToggleBtn" onclick="toggleDriverOnline()">Đang trực tuyến (Bật/Tắt)</button>
+        </div>
+        <p class="muted" id="driverStatusText">Trạng thái: Đang sẵn sàng nhận cuốc xe & đơn giao đồ ăn tại địa phương.</p>
+        <div id="driverOrderList"></div>
       </div>
     </section>
 
-    <!-- 4. ADMIN -->
-    <section id="role-admin" class="hidden">
+    <!-- ADMIN -->
+    <section id="view-admin" class="hidden">
       <div class="card">
-        <h2>Quản trị viên Vivu - Duyệt cửa hàng</h2>
-        <div id="adminShops"></div>
+        <h2>Tổng quan vận hành Vivu</h2>
+        <div class="stats-row">
+          <div class="stat-box">
+            <div class="muted">Tổng số đơn</div>
+            <div class="stat-val" id="statOrders">0</div>
+          </div>
+          <div class="stat-box">
+            <div class="muted">Doanh thu tạm tính</div>
+            <div class="stat-val" id="statRevenue">0đ</div>
+          </div>
+          <div class="stat-box">
+            <div class="muted">Quán chờ duyệt</div>
+            <div class="stat-val" id="statPendingShops">0</div>
+          </div>
+        </div>
+        <h3>Duyệt hồ sơ cửa hàng</h3>
+        <div id="adminShopList"></div>
       </div>
+
       <div class="card">
-        <h3>Tổng quan đơn hàng địa phương</h3>
-        <div id="adminOrders"></div>
+        <h3>Giám sát toàn bộ đơn hàng</h3>
+        <div id="adminOrderList"></div>
       </div>
     </section>
-  </div>
+  </main>
+
+  <div id="toast" class="toast"></div>
 
   <script>
-    const state = JSON.parse(localStorage.getItem('vivu_state_v1') || 'null') || {
+    const STORAGE_KEY = 'vivu_local_app_v1';
+    const PRICE_PER_KM = 6000;
+    const SHIP_FEE = 12000;
+
+    const DEFAULT_DATA = {
+      driverOnline: true,
       shops: [
-        { id: 1, name: 'Cơm Tấm Sáng', addr: '12 Trần Phú', dish: 'Cơm tấm sườn bì', price: 32000, status: 'approved' }
+        { id: 101, name: 'Cơm Tấm Cô Ba', address: '15 Nguyễn Huệ', dish: 'Cơm tấm sườn bì chả', price: 32000, status: 'approved' },
+        { id: 102, name: 'Bún Riêu Chợ Sáng', address: '04 Phan Chu Trinh', dish: 'Bún riêu cua đồng', price: 30000, status: 'approved' }
       ],
-      orders: []
+      orders: [
+        {
+          id: 'VV801',
+          kind: 'food',
+          label: 'Đồ ăn · Cơm Tấm Cô Ba',
+          detail: '1x Cơm tấm sườn bì chả (+12k ship)',
+          total: 44000,
+          status: 'Chờ quán xác nhận'
+        }
+      ]
     };
 
-    function save() {
-      localStorage.setItem('vivu_state_v1', JSON.stringify(state));
-      renderAll();
+    let db = loadData();
+
+    function loadData() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (!raw) return structuredClone(DEFAULT_DATA);
+        return JSON.parse(raw);
+      } catch {
+        return structuredClone(DEFAULT_DATA);
+      }
     }
 
-    function formatVND(n) {
-      return Number(n || 0).toLocaleString('vi-VN') + 'đ';
+    function saveData() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(db));
+      render();
     }
 
-    function switchRole(role, btn) {
+    function resetDemoData() {
+      db = structuredClone(DEFAULT_DATA);
+      saveData();
+      showToast('Đã khôi phục dữ liệu mẫu Vivu');
+    }
+
+    function formatMoney(val) {
+      return Number(val || 0).toLocaleString('vi-VN') + 'đ';
+    }
+
+    function showToast(msg) {
+      const el = document.getElementById('toast');
+      el.textContent = msg;
+      el.classList.add('show');
+      clearTimeout(showToast._t);
+      showToast._t = setTimeout(() => el.classList.remove('show'), 2400);
+    }
+
+    function setRole(role, btn) {
       ['customer', 'merchant', 'driver', 'admin'].forEach(r => {
-        document.getElementById('role-' + r).classList.toggle('hidden', r !== role);
+        document.getElementById('view-' + r).classList.toggle('hidden', r !== role);
       });
       document.querySelectorAll('.role-btn').forEach(b => b.classList.remove('active'));
       if (btn) btn.classList.add('active');
-      renderAll();
+      render();
     }
 
-    function calcFare() {
-      const km = parseFloat(document.getElementById('kmInput').value || 0);
-      const fare = Math.max(10000, Math.round((km * 6000) / 1000) * 1000);
-      document.getElementById('fareBox').innerHTML = `Cước tạm tính (${km} km x 6.000đ): <strong>${formatVND(fare)}</strong>`;
-      return fare;
+    function calcFare(km) {
+      const n = Math.max(0.5, parseFloat(km) || 0);
+      return Math.max(10000, Math.round((n * PRICE_PER_KM) / 1000) * 1000);
     }
 
-    function createRideOrder() {
+    function updateFarePreview() {
+      const km = parseFloat(document.getElementById('distanceKm').value) || 0;
+      const fare = calcFare(km);
+      document.getElementById('fareFormula').textContent = `${km} km × ${formatMoney(PRICE_PER_KM)}`;
+      document.getElementById('farePreview').textContent = formatMoney(fare);
+    }
+
+    function bookRide() {
       const pickup = document.getElementById('pickup').value.trim() || 'Điểm đón hiện tại';
-      const dropoff = document.getElementById('dropoff').value.trim() || 'Điểm đến';
-      const fare = calcFare();
-      state.orders.unshift({
-        id: 'VV' + Math.floor(1000 + Math.random() * 9000),
-        type: 'Đặt xe',
-        title: `${pickup} → ${dropoff}`,
-        amount: fare,
+      const dropoff = document.getElementById('dropoff').value.trim() || 'Điểm đến trung tâm';
+      const km = parseFloat(document.getElementById('distanceKm').value) || 1;
+      const fare = calcFare(km);
+
+      db.orders.unshift({
+        id: 'VV' + Math.floor(100 + Math.random() * 900),
+        kind: 'ride',
+        label: 'Đặt xe Vivu',
+        detail: `${pickup} → ${dropoff} (${km} km)`,
+        total: fare,
         status: 'Chờ tài xế'
       });
-      save();
-      alert('Đã tạo cuốc xe Vivu!');
+      saveData();
+      showToast('Đã đặt cuốc xe Vivu!');
     }
 
-    function orderFood(shop) {
-      state.orders.unshift({
-        id: 'VV' + Math.floor(1000 + Math.random() * 9000),
-        type: 'Đồ ăn (' + shop.name + ')',
-        title: shop.dish,
-        amount: shop.price + 12000,
+    function orderFood(shopId) {
+      const shop = db.shops.find(s => s.id === shopId);
+      if (!shop) return;
+      db.orders.unshift({
+        id: 'VV' + Math.floor(100 + Math.random() * 900),
+        kind: 'food',
+        label: `Đồ ăn · ${shop.name}`,
+        detail: `${shop.dish} + phí giao ${formatMoney(SHIP_FEE)}`,
+        total: Number(shop.price) + SHIP_FEE,
         status: 'Chờ quán xác nhận'
       });
-      save();
-      alert('Đã gửi đơn món ' + shop.dish + '!');
+      saveData();
+      showToast(`Đã gửi đơn tới ${shop.name}`);
     }
 
-    function registerShop() {
+    function submitShop() {
       const name = document.getElementById('shopName').value.trim();
-      const addr = document.getElementById('shopAddr').value.trim();
-      const rawDish = document.getElementById('shopDish').value.trim();
-      if (!name || !rawDish) return alert('Vui lòng nhập tên quán và món ăn.');
-      const parts = rawDish.split('-');
-      const dish = (parts[0] || rawDish).trim();
-      const price = parseInt((parts[1] || '30000').replace(/\D/g, ''), 10) || 30000;
-      state.shops.push({ id: Date.now(), name, addr, dish, price, status: 'pending' });
+      const address = document.getElementById('shopAddress').value.trim();
+      const dish = document.getElementById('dishName').value.trim();
+      const price = parseInt(document.getElementById('dishPrice').value, 10) || 30000;
+
+      if (!name || !dish) {
+        showToast('Vui lòng nhập tên quán và món nổi bật');
+        return;
+      }
+
+      db.shops.push({
+        id: Date.now(),
+        name,
+        address: address || 'Địa phương',
+        dish,
+        price,
+        status: 'pending'
+      });
+
       document.getElementById('shopName').value = '';
-      document.getElementById('shopAddr').value = '';
-      document.getElementById('shopDish').value = '';
-      save();
-      alert('Đã gửi đăng ký quán! Vào tab Admin để duyệt.');
+      document.getElementById('shopAddress').value = '';
+      document.getElementById('dishName').value = '';
+      saveData();
+      showToast('Đã gửi hồ sơ quán! Chuyển sang Admin để duyệt');
     }
 
-    function approveShop(id) {
-      const s = state.shops.find(x => x.id === id);
-      if (s) s.status = 'approved';
-      save();
+    function approveShop(shopId) {
+      const shop = db.shops.find(s => s.id === shopId);
+      if (shop) {
+        shop.status = 'approved';
+        saveData();
+        showToast(`Đã duyệt quán ${shop.name}`);
+      }
     }
 
-    function updateOrderStatus(id, nextStatus) {
-      const o = state.orders.find(x => x.id === id);
-      if (o) o.status = nextStatus;
-      save();
+    function toggleDriverOnline() {
+      db.driverOnline = !db.driverOnline;
+      saveData();
+      showToast(db.driverOnline ? 'Tài xế đã bật trực tuyến' : 'Tài xế đã tạm nghỉ');
     }
 
-    function renderAll() {
-      const approved = state.shops.filter(s => s.status === 'approved');
-      document.getElementById('approvedMenus').innerHTML = approved.length
-        ? approved.map(s => `
-            <div class="item-row">
+    function advanceOrder(orderId, nextStatus) {
+      const order = db.orders.find(o => o.id === orderId);
+      if (order) {
+        order.status = nextStatus;
+        saveData();
+        showToast(`Đơn #${order.id} → ${nextStatus}`);
+      }
+    }
+
+    function statusBadge(status) {
+      if (status === 'Hoàn thành') return `<span class="pill pill-ok">${status}</span>`;
+      if (status === 'Đang giao') return `<span class="pill pill-info">${status}</span>`;
+      return `<span class="pill pill-warn">${status}</span>`;
+    }
+
+    function render() {
+      const approvedShops = db.shops.filter(s => s.status === 'approved');
+      document.getElementById('approvedShopCount').textContent = `${approvedShops.length} quán`;
+
+      document.getElementById('customerShopList').innerHTML = approvedShops.length
+        ? approvedShops.map(s => `
+            <div class="shop-card">
               <div>
-                <strong>${s.name}</strong> · ${s.dish}<br/>
-                <small>${s.addr || 'Địa phương'} · Món: ${formatVND(s.price)} (+12k ship)</small>
+                <strong>${s.name}</strong> · <span class="muted">${s.address}</span><br/>
+                <span>${s.dish} — <strong>${formatMoney(s.price)}</strong></span>
               </div>
-              <button class="btn btn-sm" onclick='orderFood(${JSON.stringify(s).replace(/'/g, "&#39;")})'>Đặt món</button>
+              <button class="btn btn-sm btn-accent" onclick="orderFood(${s.id})">Đặt món</button>
             </div>
           `).join('')
-        : '<p>Chưa có quán nào được duyệt.</p>';
+        : '<p class="muted">Chưa có cửa hàng nào được duyệt.</p>';
 
-      const renderOrderList = (elId, mode) => {
-        document.getElementById(elId).innerHTML = state.orders.length
-          ? state.orders.map(o => {
-              let actionBtn = '';
-              if (mode === 'merchant' && o.type.startsWith('Đồ ăn') && o.status === 'Chờ quán xác nhận') {
-                actionBtn = `<button class="btn btn-sm" onclick="updateOrderStatus('${o.id}', 'Chờ tài xế')">Xác nhận làm món</button>`;
-              }
-              if (mode === 'driver' && o.status === 'Chờ tài xế') {
-                actionBtn = `<button class="btn btn-sm" onclick="updateOrderStatus('${o.id}', 'Đang giao')">Nhận đơn</button>`;
-              } else if (mode === 'driver' && o.status === 'Đang giao') {
-                actionBtn = `<button class="btn btn-sm" onclick="updateOrderStatus('${o.id}', 'Hoàn thành')">Hoàn tất giao</button>`;
-              }
-              return `
-                <div class="item-row">
-                  <div>
-                    <strong>#${o.id} · ${o.type}</strong> — <span class="badge">${o.status}</span><br/>
-                    <small>${o.title} · <strong>${formatVND(o.amount)}</strong></small>
-                  </div>
-                  <div>${actionBtn}</div>
-                </div>
-              `;
-            }).join('')
-          : '<p>Chưa có đơn hàng nào.</p>';
+      const renderOrders = (targetId, mode) => {
+        const el = document.getElementById(targetId);
+        if (!db.orders.length) {
+          el.innerHTML = '<p class="muted">Chưa có đơn hàng nào.</p>';
+          return;
+        }
+        el.innerHTML = db.orders.map(o => {
+          let actionHtml = '';
+          if (mode === 'merchant' && o.kind === 'food' && o.status === 'Chờ quán xác nhận') {
+            actionHtml = `<button class="btn btn-sm" onclick="advanceOrder('${o.id}', 'Chờ tài xế')">Xác nhận làm món</button>`;
+          } else if (mode === 'driver' && db.driverOnline && o.status === 'Chờ tài xế') {
+            actionHtml = `<button class="btn btn-sm" onclick="advanceOrder('${o.id}', 'Đang giao')">Nhận đơn</button>`;
+          } else if (mode === 'driver' && o.status === 'Đang giao') {
+            actionHtml = `<button class="btn btn-sm btn-accent" onclick="advanceOrder('${o.id}', 'Hoàn thành')">Hoàn thành</button>`;
+          }
+          return `
+            <div class="order-item">
+              <div>
+                <strong>#${o.id} · ${o.label}</strong> ${statusBadge(o.status)}<br/>
+                <span class="muted">${o.detail} · <strong>${formatMoney(o.total)}</strong></span>
+              </div>
+              <div>${actionHtml}</div>
+            </div>
+          `;
+        }).join('');
       };
 
-      renderOrderList('customerOrders', 'customer');
-      renderOrderList('merchantOrders', 'merchant');
-      renderOrderList('driverOrders', 'driver');
-      renderOrderList('adminOrders', 'admin');
+      renderOrders('customerOrderList', 'customer');
+      renderOrders('merchantOrderList', 'merchant');
+      renderOrders('driverOrderList', 'driver');
+      renderOrders('adminOrderList', 'admin');
 
-      document.getElementById('adminShops').innerHTML = state.shops.map(s => `
-        <div class="item-row">
+      document.getElementById('driverStatusText').textContent = db.driverOnline
+        ? 'Trạng thái: Đang trực tuyến — Sẵn sàng nhận cuốc xe và đơn giao đồ ăn.'
+        : 'Trạng thái: Đang tạm nghỉ — Bấm nút trên để bật nhận đơn.';
+      document.getElementById('driverToggleBtn').textContent = db.driverOnline ? 'Đang trực tuyến' : 'Đang nghỉ';
+
+      const pendingCount = db.shops.filter(s => s.status === 'pending').length;
+      const totalRevenue = db.orders.reduce((sum, o) => sum + Number(o.total || 0), 0);
+      document.getElementById('statOrders').textContent = db.orders.length;
+      document.getElementById('statRevenue').textContent = formatMoney(totalRevenue);
+      document.getElementById('statPendingShops').textContent = pendingCount;
+
+      document.getElementById('adminShopList').innerHTML = db.shops.map(s => `
+        <div class="order-item">
           <div>
-            <strong>${s.name}</strong> (${s.dish} - ${formatVND(s.price)})<br/>
-            <small>${s.addr || ''} · Trạng thái: <strong>${s.status}</strong></small>
+            <strong>${s.name}</strong> (${s.address})<br/>
+            <span class="muted">Món: ${s.dish} (${formatMoney(s.price)}) · ${s.status === 'approved' ? 'Đã duyệt' : 'Chờ duyệt'}</span>
           </div>
-          ${s.status === 'pending' ? `<button class="btn btn-sm" onclick="approveShop(${s.id})">Duyệt quán</button>` : '<span class="badge">Đã duyệt</span>'}
+          <div>
+            ${s.status === 'pending'
+              ? `<button class="btn btn-sm" onclick="approveShop(${s.id})">Duyệt quán</button>`
+              : `<span class="pill pill-ok">Đã duyệt</span>`}
+          </div>
         </div>
       `).join('');
     }
 
-    calcFare();
-    renderAll();
+    updateFarePreview();
+    render();
   </script>
 </body>
 </html>
