@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Vivu - Đặt xe & Giao đồ ăn địa phương</title>
+  <style>
+    * { box-sizing: border-box; font-family: system-ui, -apple-system, sans-serif; }
+    body { margin: 0; background: #f4f6f8; color: #1f2937; }
+    header { background: #0f766e; color: #fff; padding: 14px 16px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 10; }
+    .brand { font-size: 20px; font-weight: 700; letter-spacing: 0.3px; }
+    .role-bar { display: flex; gap: 6px; flex-wrap: wrap; }
+    .role-btn { border: 1px solid rgba(255,255,255,0.35); background: transparent; color: #fff; padding: 6px 10px; border-radius: 8px; cursor: pointer; font-size: 12px; }
+    .role-btn.active { background: #fff; color: #0f766e; font-weight: 700; }
+    .container { max-width: 720px; margin: 16px auto; padding: 0 14px 40px; }
+    .card { background: #fff; border-radius: 12px; padding: 16px; margin-bottom: 14px; box-shadow: 0 1px 4px rgba(0,0,0,0.06); }
+    h2, h3 { margin: 0 0 10px; }
+    label { display: block; font-size: 13px; font-weight: 600; margin: 10px 0 4px; }
+    input, select, textarea { width: 100%; padding: 10px; border: 1px solid #d1d5db; border-radius: 8px; font-size: 14px; }
+    .btn { margin-top: 12px; background: #0f766e; color: #fff; border: none; padding: 10px 16px; border-radius: 8px; font-weight: 600; cursor: pointer; }
+    .btn-sm { padding: 6px 10px; font-size: 12px; margin-top: 6px; }
+    .item-row { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid #f1f5f9; gap: 10px; }
+    .badge { display: inline-block; padding: 3px 8px; border-radius: 999px; font-size: 12px; background: #e6fffa; color: #0f766e; font-weight: 600; }
+    .hidden { display: none; }
+    .summary-box { background: #f0fdfa; border: 1px solid #99f6e4; padding: 12px; border-radius: 8px; margin-top: 10px; }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="brand">Vivu</div>
+    <div class="role-bar">
+      <button class="role-btn active" onclick="switchRole('customer', this)">Khách hàng</button>
+      <button class="role-btn" onclick="switchRole('merchant', this)">Chủ quán</button>
+      <button class="role-btn" onclick="switchRole('driver', this)">Tài xế</button>
+      <button class="role-btn" onclick="switchRole('admin', this)">Admin</button>
+    </div>
+  </header>
+
+  <div class="container">
+    <!-- 1. KHÁCH HÀNG -->
+    <section id="role-customer">
+      <div class="card">
+        <h2>Đặt xe Vivu (Ước tính cước)</h2>
+        <label>Điểm đón</label>
+        <input id="pickup" placeholder="VD: Ngã 6, đường Nguyễn Tất Thành" />
+        <label>Điểm đến</label>
+        <input id="dropoff" placeholder="VD: Chợ trung tâm" />
+        <label>Khoảng cách ước tính (km)</label>
+        <input id="kmInput" type="number" step="0.5" min="1" value="3.5" oninput="calcFare()" />
+        <div class="summary-box" id="fareBox">Cước tạm tính (6.000đ/km): <strong>21.000đ</strong></div>
+        <button class="btn" onclick="createRideOrder()">Đặt xe ngay</button>
+      </div>
+
+      <div class="card">
+        <h2>Đặt đồ ăn địa phương</h2>
+        <div id="approvedMenus"></div>
+      </div>
+
+      <div class="card">
+        <h3>Đơn của tôi</h3>
+        <div id="customerOrders"></div>
+      </div>
+    </section>
+
+    <!-- 2. CHỦ QUÁN -->
+    <section id="role-merchant" class="hidden">
+      <div class="card">
+        <h2>Đăng ký mở quán trên Vivu</h2>
+        <label>Tên quán</label>
+        <input id="shopName" placeholder="VD: Bún Chả Cô Lan" />
+        <label>Địa chỉ quán</label>
+        <input id="shopAddr" placeholder="VD: 45 Lê Duẩn" />
+        <label>Món nổi bật & Giá (VD: Bún chả đặc biệt - 35000)</label>
+        <input id="shopDish" placeholder="VD: Bún chả đặc biệt - 35000" />
+        <button class="btn" onclick="registerShop()">Gửi hồ sơ đăng ký quán</button>
+      </div>
+
+      <div class="card">
+        <h3>Đơn đồ ăn cần xử lý</h3>
+        <div id="merchantOrders"></div>
+      </div>
+    </section>
+
+    <!-- 3. TÀI XẾ -->
+    <section id="role-driver" class="hidden">
+      <div class="card">
+        <h2>Màn hình Tài xế Vivu</h2>
+        <p>Trạng thái: <span class="badge" id="driverStatus">Đang sẵn sàng</span></p>
+        <div id="driverOrders"></div>
+      </div>
+    </section>
+
+    <!-- 4. ADMIN -->
+    <section id="role-admin" class="hidden">
+      <div class="card">
+        <h2>Quản trị viên Vivu - Duyệt cửa hàng</h2>
+        <div id="adminShops"></div>
+      </div>
+      <div class="card">
+        <h3>Tổng quan đơn hàng địa phương</h3>
+        <div id="adminOrders"></div>
+      </div>
+    </section>
+  </div>
+
+  <script>
+    const state = JSON.parse(localStorage.getItem('vivu_state_v1') || 'null') || {
+      shops: [
+        { id: 1, name: 'Cơm Tấm Sáng', addr: '12 Trần Phú', dish: 'Cơm tấm sườn bì', price: 32000, status: 'approved' }
+      ],
+      orders: []
+    };
+
+    function save() {
+      localStorage.setItem('vivu_state_v1', JSON.stringify(state));
+      renderAll();
+    }
+
+    function formatVND(n) {
+      return Number(n || 0).toLocaleString('vi-VN') + 'đ';
+    }
+
+    function switchRole(role, btn) {
+      ['customer', 'merchant', 'driver', 'admin'].forEach(r => {
+        document.getElementById('role-' + r).classList.toggle('hidden', r !== role);
+      });
+      document.querySelectorAll('.role-btn').forEach(b => b.classList.remove('active'));
+      if (btn) btn.classList.add('active');
+      renderAll();
+    }
+
+    function calcFare() {
+      const km = parseFloat(document.getElementById('kmInput').value || 0);
+      const fare = Math.max(10000, Math.round((km * 6000) / 1000) * 1000);
+      document.getElementById('fareBox').innerHTML = `Cước tạm tính (${km} km x 6.000đ): <strong>${formatVND(fare)}</strong>`;
+      return fare;
+    }
+
+    function createRideOrder() {
+      const pickup = document.getElementById('pickup').value.trim() || 'Điểm đón hiện tại';
+      const dropoff = document.getElementById('dropoff').value.trim() || 'Điểm đến';
+      const fare = calcFare();
+      state.orders.unshift({
+        id: 'VV' + Math.floor(1000 + Math.random() * 9000),
+        type: 'Đặt xe',
+        title: `${pickup} → ${dropoff}`,
+        amount: fare,
+        status: 'Chờ tài xế'
+      });
+      save();
+      alert('Đã tạo cuốc xe Vivu!');
+    }
+
+    function orderFood(shop) {
+      state.orders.unshift({
+        id: 'VV' + Math.floor(1000 + Math.random() * 9000),
+        type: 'Đồ ăn (' + shop.name + ')',
+        title: shop.dish,
+        amount: shop.price + 12000,
+        status: 'Chờ quán xác nhận'
+      });
+      save();
+      alert('Đã gửi đơn món ' + shop.dish + '!');
+    }
+
+    function registerShop() {
+      const name = document.getElementById('shopName').value.trim();
+      const addr = document.getElementById('shopAddr').value.trim();
+      const rawDish = document.getElementById('shopDish').value.trim();
+      if (!name || !rawDish) return alert('Vui lòng nhập tên quán và món ăn.');
+      const parts = rawDish.split('-');
+      const dish = (parts[0] || rawDish).trim();
+      const price = parseInt((parts[1] || '30000').replace(/\D/g, ''), 10) || 30000;
+      state.shops.push({ id: Date.now(), name, addr, dish, price, status: 'pending' });
+      document.getElementById('shopName').value = '';
+      document.getElementById('shopAddr').value = '';
+      document.getElementById('shopDish').value = '';
+      save();
+      alert('Đã gửi đăng ký quán! Vào tab Admin để duyệt.');
+    }
+
+    function approveShop(id) {
+      const s = state.shops.find(x => x.id === id);
+      if (s) s.status = 'approved';
+      save();
+    }
+
+    function updateOrderStatus(id, nextStatus) {
+      const o = state.orders.find(x => x.id === id);
+      if (o) o.status = nextStatus;
+      save();
+    }
+
+    function renderAll() {
+      const approved = state.shops.filter(s => s.status === 'approved');
+      document.getElementById('approvedMenus').innerHTML = approved.length
+        ? approved.map(s => `
+            <div class="item-row">
+              <div>
+                <strong>${s.name}</strong> · ${s.dish}<br/>
+                <small>${s.addr || 'Địa phương'} · Món: ${formatVND(s.price)} (+12k ship)</small>
+              </div>
+              <button class="btn btn-sm" onclick='orderFood(${JSON.stringify(s).replace(/'/g, "&#39;")})'>Đặt món</button>
+            </div>
+          `).join('')
+        : '<p>Chưa có quán nào được duyệt.</p>';
+
+      const renderOrderList = (elId, mode) => {
+        document.getElementById(elId).innerHTML = state.orders.length
+          ? state.orders.map(o => {
+              let actionBtn = '';
+              if (mode === 'merchant' && o.type.startsWith('Đồ ăn') && o.status === 'Chờ quán xác nhận') {
+                actionBtn = `<button class="btn btn-sm" onclick="updateOrderStatus('${o.id}', 'Chờ tài xế')">Xác nhận làm món</button>`;
+              }
+              if (mode === 'driver' && o.status === 'Chờ tài xế') {
+                actionBtn = `<button class="btn btn-sm" onclick="updateOrderStatus('${o.id}', 'Đang giao')">Nhận đơn</button>`;
+              } else if (mode === 'driver' && o.status === 'Đang giao') {
+                actionBtn = `<button class="btn btn-sm" onclick="updateOrderStatus('${o.id}', 'Hoàn thành')">Hoàn tất giao</button>`;
+              }
+              return `
+                <div class="item-row">
+                  <div>
+                    <strong>#${o.id} · ${o.type}</strong> — <span class="badge">${o.status}</span><br/>
+                    <small>${o.title} · <strong>${formatVND(o.amount)}</strong></small>
+                  </div>
+                  <div>${actionBtn}</div>
+                </div>
+              `;
+            }).join('')
+          : '<p>Chưa có đơn hàng nào.</p>';
+      };
+
+      renderOrderList('customerOrders', 'customer');
+      renderOrderList('merchantOrders', 'merchant');
+      renderOrderList('driverOrders', 'driver');
+      renderOrderList('adminOrders', 'admin');
+
+      document.getElementById('adminShops').innerHTML = state.shops.map(s => `
+        <div class="item-row">
+          <div>
+            <strong>${s.name}</strong> (${s.dish} - ${formatVND(s.price)})<br/>
+            <small>${s.addr || ''} · Trạng thái: <strong>${s.status}</strong></small>
+          </div>
+          ${s.status === 'pending' ? `<button class="btn btn-sm" onclick="approveShop(${s.id})">Duyệt quán</button>` : '<span class="badge">Đã duyệt</span>'}
+        </div>
+      `).join('');
+    }
+
+    calcFare();
+    renderAll();
+  </script>
+</body>
+</html>
